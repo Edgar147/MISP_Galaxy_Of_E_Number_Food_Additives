@@ -1,0 +1,10 @@
+{
+    "name": "Banned E Additives",
+    "type": "banned-e-additives",
+    "description": "E numbers of food additives banned in the EU.",
+    "authors": [
+        "Edgar Karapetyan, Jawad El Amraoui"
+    ],
+    "version": 1,
+    "uuid": "d3210471-756c-48a2-9efe-d0483b74364f"
+}

@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import uuid
+import json
 
 url = "https://en.wikipedia.org/wiki/E_number"
 
@@ -55,3 +57,63 @@ for additive in additives_info:
 # with open(file_path, 'w') as file:
 #     for additive in additives_info:
 #         file.write(f"{additive['E-Number']}\n")
+
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+# misp_galaxy = {
+#     "name": "Food Additives",
+#     "type": "food-additive",
+#     "description": "Galaxy representing food additives and their characteristics.",
+#     "version": 1,
+#     "uuid": generate_uuid(),
+#     "values": []
+# }
+misp_galaxy ={
+  "name": "Banned E Additives",
+  "type": "banned-e-additives",
+  "description": "E numbers of food additives banned in the EU.",
+  "authors": ["Edgar Karapetyan, Jawad El Amraoui"],
+  "version": 1,
+  "uuid": generate_uuid()
+}
+
+json_data = json.dumps(misp_galaxy, indent=4)
+
+
+with open("../galaxies/banned-e-additives-galaxy.json", "w") as file:
+    file.write(json_data)
+
+
+
+
+
+
+
+clusters = []
+
+for additive in additives_info:
+    cluster = {
+        "meta": {
+            "category": additive.get('Category', "Unknown"),
+            "name": additive.get('Name', "Unknown"),
+        },
+        "description": "Additive banned in EU.",
+        "value": additive.get('E-Number', ""),
+        "uuid": generate_uuid()
+    }
+    clusters.append(cluster)
+
+final_structure = {
+    "values": clusters
+}
+
+json_data = json.dumps(final_structure, indent=4)
+
+print(json_data)
+
+with open("../clusters/banned-e-additives-cluster.json", "w") as file:
+    file.write(json_data)

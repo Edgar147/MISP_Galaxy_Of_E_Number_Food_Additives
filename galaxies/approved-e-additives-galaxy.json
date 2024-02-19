@@ -1,0 +1,10 @@
+{
+    "name": "Approved E Additives",
+    "type": "approved-e-additives",
+    "description": "E numbers of food additives that are approved for use in EU.",
+    "authors": [
+        "Edgar Karapetyan, Jawad El Amraoui"
+    ],
+    "version": 1,
+    "uuid": "4620f946-f67a-425f-a6a3-ed264fd34bce"
+}

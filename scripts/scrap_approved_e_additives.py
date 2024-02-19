@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-
+import uuid
+import json
+import re
 
 url = "https://dermnetnz.org/topics/food-additives-and-e-numbers"
 
@@ -13,7 +15,6 @@ food_additives_info = []
 
 # Banned
 ignored_additives = ['E161g', 'E171', 'E128']
-
 
 def process_cell_content(cell):
     content = ""
@@ -54,7 +55,7 @@ for table in tables:
                     'E-Number': e_number,
                     'Name': name,
                     'Description': description,
-                    'Examples of Use': examples_of_use
+                    'UsedIn': examples_of_use
                 })
 
 base_detail_url = "https://proe.info/additives/"
@@ -81,7 +82,6 @@ def fetch_additive_details(e_number):
     else:
         danger = "Details unavailable"
 
-    # Récupération de la catégorie
     category_element = detail_soup.find(class_="addprop addprop--category")
     if category_element:
         category = category_element.text.strip().replace('\n', ', ')
@@ -117,49 +117,43 @@ def fetch_additive_details_bio(e_number):
 
     return bio
 
+
 for additive in food_additives_info:
     bio_status = fetch_additive_details_bio(additive['E-Number'])
     additive['Bio'] = bio_status
 
-product_names = []
 
 def fetch_products_using_additive(e_number):
-    url = f"https://fr.openfoodfacts.org/additif/{e_number.lower()}"
-    print("url de base=="+url)
+    product_name = ""
+    url = f"https://uk.openfoodfacts.org/additive/{e_number.lower()}"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     }
 
-
     response = requests.get(url, headers=headers)
-
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    spans = soup.select("ul.products a > span", limit=2)
+    spans = soup.select("ul.products a > span")
 
     for span in spans:
-        product_names.append(span.text.strip())
-    return product_names
+        text = span.text.strip()
+        if re.search("[a-zA-Z].*[a-zA-Z]", text):
+            product_name = text
+            break
 
-
+    return product_name
 
 
 for additive in food_additives_info:
-    product_names = fetch_products_using_additive(additive['E-Number'])
+    product_name = fetch_products_using_additive(additive['E-Number'])
+    additive['Product'] = product_name if product_name else "Not available"
 
-    if len(product_names) > 0:
-        additive['Product1'] = product_names[0]
-    else:
-        additive['Product1'] = "Non disponible"
 
-    if len(product_names) > 1:
-        additive['Product2'] = product_names[1]
-    else:
-        additive['Product2'] = "Non disponible"
 
-for additive in food_additives_info:
-    print(
-        f"E-Number: {additive['E-Number']} || Name: {additive['Name']} || Description: {additive['Description']} || Examples of Use: {additive['Examples of Use']} || Origin: {additive['Origin']} || Danger: {additive['Danger']} || Category: {additive['Category']} || Bio: {additive['Bio']} || Product1: {additive['Product1']}|| Product2: {additive['Product2']}")
+
+# for additive in food_additives_info:
+#     print(
+#         f"E-Number: {additive['E-Number']} || Name: {additive['Name']} || Description: {additive['Description']} || Examples of Use: {additive['Examples of Use']} || Origin: {additive['Origin']} || Danger: {additive['Danger']} || Category: {additive['Category']} || Bio: {additive['Bio']} || Product1: {additive['Product1']}|| Product2: {additive['Product2']}")
 
 
 ##Verify
@@ -168,3 +162,73 @@ for additive in food_additives_info:
 # with open(file_path, 'w') as file:
 #     for additive in food_additives_info:
 #         file.write(f"{additive['E-Number']}\n")
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+# misp_galaxy = {
+#     "name": "Food Additives",
+#     "type": "food-additive",
+#     "description": "Galaxy representing food additives and their characteristics.",
+#     "version": 1,
+#     "uuid": generate_uuid(),
+#     "values": []
+# }
+
+misp_galaxy ={
+  "name": "Approved E Additives",
+  "type": "approved-e-additives",
+  "description": "E numbers of food additives that are approved for use in EU.",
+  "authors": ["Edgar Karapetyan, Jawad El Amraoui"],
+  "version": 1,
+  "uuid": generate_uuid()
+}
+
+json_data = json.dumps(misp_galaxy, indent=4)
+
+
+with open("../galaxies/approved-e-additives-galaxy.json", "w") as file:
+    file.write(json_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+clusters = []
+
+for additive in food_additives_info:
+    cluster = {
+        "meta": {
+            "category": additive.get('Category', "Unknown"),
+            "origin": additive.get('Origin', "Unknown"),
+            "name": additive.get('Name', "Unknown"),
+            "danger": additive.get('Danger', "Unknown"),
+            "allowed_in_bio": additive.get('Bio', "Not specified"),
+            "used_in": additive.get('UsedIn', "Not specified"),
+            "product": additive.get('Product', "Not available"),
+        },
+        "description": additive.get('Description', ""),
+        "value": additive.get('E-Number', ""),
+        "uuid": generate_uuid()
+    }
+    clusters.append(cluster)  # Ajouter le cluster à la liste des clusters
+
+final_structure = {
+    "values": clusters
+}
+
+json_data = json.dumps(final_structure, ensure_ascii=False, indent=4)
+
+# print(json_data)
+
+with open("../clusters/approved-e-additives-cluster.json", "w", encoding="utf-8") as file:
+    file.write(json_data)
