@@ -1,0 +1,10 @@
+{
+    "description": "E number food additives",
+    "icon": "additive",
+    "authors": [
+        "Edgar Karapetyan, Jawad El Amraoui"
+    ],
+    "type": "e-additives",
+    "uuid": "dc2e5e6f-b267-4328-9219-ccfe15d62425",
+    "version": 1
+}
