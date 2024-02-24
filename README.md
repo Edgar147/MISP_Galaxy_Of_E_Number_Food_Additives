@@ -2,12 +2,10 @@
 
 ## Context
 
+This project focuses on E number food additives, developed as part of an academic project within the context of MISP definitions and structures.
+The project aims to collect and classify detailed information about E food additives, contributing to future food safety initiatives.
 
-This project includes scripts and JSON structures to represent E number food additives within MISP galaxies and clusters, developed within the context of an academic MISP project.
-The project contributes to the ongoing research and understanding of food safety, particularly regarding the regulation and use of E number food additives.
 ## Overview
-
-The goal of this project is to scrape food additive data from various sources and to transform this data into MISP galaxy and cluster formats. This allows for better representation and sharing of information regarding food additives that are either approved or banned within the European Union.
 
 Initially, our focus was on identifying and understanding the threats posed by carcinogenic products in our daily lives. We conducted an analysis based on the list of carcinogenic elements provided by the World Health Organization (WHO). This list covered not only elements related to food but also those associated with various activities such as cleaning and work. However, after thorough analysis, we decided to shift our focus from carcinogens to elements commonly used in our daily routines that may pose health risks—specifically, food additives.
 
